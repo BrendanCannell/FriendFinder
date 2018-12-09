@@ -160,7 +160,7 @@
     <hr>
     <footer class="footer">
       <div class="container">
-        <p><a href="/api/friends">API Friends List</a> | <a class="reset" href="#">Reset</a> | <a href="https://github.com/BrendanCannell/FriendFinder">GitHub Repo</a></p>
+        <p><a href="/api/friends">API Friends List</a> | <a class="reset" href="javascript:void(0)">Reset</a> | <a href="https://github.com/BrendanCannell/FriendFinder">GitHub Repo</a></p>
       </div>
     </footer>
 
@@ -267,7 +267,7 @@
         alert("Please fill out all fields before submitting!");
       }
     });
-    
+
     $(".reset").on('click', () => $.ajax({ method: 'DELETE', url: "/api/friends"}))
   </script>
 
