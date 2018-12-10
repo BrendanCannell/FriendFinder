@@ -1,19 +1,13 @@
 let express = require('express');
 
-module.exports = (toPath) => {
-  let router = express.Router();
-  
-  router.get("/survey", (req, res) => {
-    res.sendFile(toPath("app/public/survey.html"));
-  })
-  
-  router.get("/", (req, res) => {
-    res.sendFile(toPath("app/public/home.html"));
-  })
-  
-  router.get("*", (req, res) => {
-    res.redirect("/");
-  })
+module.exports = (filepaths) =>
+  express.Router()
 
-  return router;
-};
+    .get("/survey", (req, res) =>
+      res.sendFile(filepaths.survey))
+
+    .get("/", (req, res) =>
+      res.sendFile(filepaths.home))
+
+    .get("*", (req, res) =>
+      res.redirect("/"))

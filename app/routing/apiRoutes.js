@@ -6,11 +6,11 @@ let readFile = util.promisify(fs.readFile);
 let writeFile = util.promisify(fs.writeFile);
 
 let findClosest = (newFriend, friends) => {
-  // The friend-finding algorithm described by the instructions is known as the "taxicab distance," among other names
+  // The friend-finding metric described by the instructions is known as the "taxicab distance," among other names
   let taxicabDistance = (arr1, arr2) => {
     let absoluteDifference = (a, b) => Math.abs(a - b);
     let diffs = R.zipWith(absoluteDifference, arr1, arr2);
-  
+
     return diffs.reduce(R.add);
   }
 
@@ -21,38 +21,40 @@ let findClosest = (newFriend, friends) => {
   return closest;
 }
 
-module.exports = (toPath) => {
-  let friendsPath = toPath("app/data/friends.json");
-  let resetPath = toPath("app/data/reset.json");
+let valid = (friend) => true
+  && friend.name && friend.photo && friend.scores
+  && friend.scores.length === 10
+  && friend.scores.every((score) => true
+    && !isNaN(score) && score | 0 === score // integer?
+    && score >= 1 && score <= 5)
 
-  let router = express.Router();
+module.exports = (filepaths) => express.Router()
 
-  router.get("/api/friends", (req, res) => {
-    res.sendFile(toPath("app/data/friends.json"));
-  });
+  .get("/api/friends", (req, res) =>
+    res.sendFile(filepaths.friends))
 
-  router.post("/api/friends", async (req, res) => {
+  .post("/api/friends", async (req, res) => {
     try {
       let newFriend = R.pick(['name', 'photo', 'scores'], req.body);
-      let friends = JSON.parse(await readFile(friendsPath));
+      if (!valid(newFriend)) throw "invalid";
+
+      let friends = JSON.parse(await readFile(filepaths.friends));
       let closest = findClosest(newFriend, friends);
 
       res.send(R.pick(['name', 'photo'], closest));
-      await writeFile(friendsPath, JSON.stringify([...friends, newFriend]));
+      await writeFile(filepaths.friends, JSON.stringify([...friends, newFriend]));
     } catch (e) {
       console.log(e);
+      res.sendStatus(400);
     }
-  });
+  })
 
-  router.delete("/api/friends", async (req, res) => {
+  .delete("/api/friends", async (req, res) => {
     try {
-      let resetData = await readFile(resetPath);
-      await writeFile(friendsPath, resetData);
+      let resetData = await readFile(filepaths.reset);
+      await writeFile(filepaths.friends, resetData);
       res.send();
     } catch (e) {
       console.log(e);
     }
   })
-
-  return router;
-}
